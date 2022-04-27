@@ -1,158 +1,157 @@
 """
 Author:           Khanh Vu
-Lab:              Lab 1
-Date:             04.17.2022
+Lab:              Lab 1 (Revised)
+Date:             04.19.2022
 Description:      This module is a collection of individual functions to prompt user for inputs and to validate inputs
                   depending on input type (e.g. int, float, item from a menu)
 Sources:          Lab 1 specifications
                   CIS 233Y Python II - Week 1 Lecture notes and videos
                   https://stackoverflow.com/questions/3886402/how-to-get-numbers-after-decimal-point
+                  Week 3 Lecture
 """
 
-# An input_int function that asks the user to type in a whole number
+
+# A num_in_range_validation function that returns True if the number is in a specifies range.
+# Otherwise, it returns false
+def num_in_range_validation(ge, gt, lt, le, num):
+    if gt is not None and num <= gt:
+        return False
+    elif ge is not None and num < ge:
+        return False
+    elif lt is not None and num >= lt:
+        return False
+    elif le is not None and num > le:
+        return False
+    else:
+        return True
 
 
-def input_int(prompt="Please enter a whole number: ", error_string="Invalid input. Enter a whole number only!",
-              ge=None, gt=None, lt=None, le=None):
-    # Change prompt text depending on the value of keyword arguments
-    if ge is not None and gt is None and lt is None and le is None:
-        prompt = f"Please enter a whole number that is greater than or equal to {ge}: "
-    elif gt is not None and ge is None and lt is None and le is None:
-        prompt = f"Please enter a whole number that is greater than {gt}: "
-    elif lt is not None and ge is None and gt is None and le is None:
-        prompt = f"Please enter a whole number that is less than {lt}: "
-    elif le is not None and ge is None and gt is None and lt is None:
-        prompt = f"Please enter a whole number that is less than or equal to {le}: "
-    elif ge is not None and lt is not None and gt is None and le is None:
-        prompt = f"Please enter a whole number that is (greater than or equal to) {gt} but less than {lt}: "
-    elif ge is not None and le is not None and gt is None and lt is None:
-        prompt = f"Please enter a whole number that is (greater than or equal to) {ge} " \
-                 f"but (less than or equal to) {le}: "
-    elif gt is not None and lt is not None and ge is None and le is None:
-        prompt = f"Please enter a whole number that is (greater than) {gt} but (less than or equal to) {le}: "
-    elif gt is not None and le is not None and ge is None and lt is None:
-        prompt = f"Please enter a whole number that is (greater than) {gt} but (less than or equal to) {le}: "
-
-    # Validate user input
+# An input_num function that prompts the user for either any number or a whole number only
+def input_num(prompt="Please enter a number: ",
+              error_string="Invalid input. Enter a number only!",
+              ge=None, gt=None, lt=None, le=None
+              , num_conversion=float):
+    # Prompt user for input
     while True:
         try:
-            whole_number = int(input(prompt))
-            if gt is not None and whole_number <= gt:
-                print ("Invalid input! Enter value that is greater than ", gt)
-                continue
-            elif ge is not None and whole_number < ge:
-                print ("Invalid input! Enter value that is greater than or equal to ", ge)
-                continue
-            elif lt is not None and whole_number >= lt:
-                print("Invalid input! Enter value that is less than ", lt)
-                continue
-            elif le is not None and whole_number > le:
-                print("Invalid input! Enter value that is less than or equal ", le)
-                continue
+            num_input = num_conversion(input(prompt))
+            # Call num_in_range_input() to prompt user to input a number falling in a specified range
+            if num_in_range_validation(ge, gt, lt, le, num_input):
+                return num_input
             else:
-                return whole_number
+                print(error_string)
+                print()
+                continue
         except ValueError:
             print(error_string)
+            print()
 
 
-# An input_float function that asks the user to type in a decimal number
-def input_float(prompt="Please enter a decimal number: ", error_string="Invalid input. Enter a decimal number only!"):
-    while True:
-        try:
-            input_number = float(input(prompt))
-            int_number = int(input_number)    # Converting the input number to integer. If the user enters integer,
-            # the difference between input number and the converted_to_int number will be zero.
-            # Other wise, the input number is float unless users enter string
-            dif = input_number - int_number
-            if dif == 0:
-                print(error_string)
-                continue
-            else:
-                return input_number
-        except ValueError:
-            print("Invalid input. Try again!")
+# An input_int function that prompts user for a whole number
+def input_int(prompt="Please enter a whole number:"
+              , error_string="Invalid input. Enter a whole number only!"
+              , ge=None, gt=None, lt=None, le=None):
+    int_input = input_num(prompt=prompt, error_string=error_string, ge=ge, gt=gt, lt=lt, le=le, num_conversion=int)
+    return int_input
+
+
+# An input_float function that prompts user for a decimal number
+def input_float(prompt="Please enter a number: "
+                , error_string="Invalid input. Enter a number only!"
+                , ge=None, gt=None, lt=None, le=None):
+    float_input = input_num(prompt=prompt, error_string=error_string, ge=ge, gt=gt, lt=lt, le=le, num_conversion=float)
+    return float_input
 
 
 # An input_string function that asks the user to type in a piece of text
-def input_string(prompt="Please enter a piece of text: ", error_string="Invalid input. "
-                                                                       "Enter a non-numeric text string only!"):
+def input_string(prompt="Please enter a piece of text: "
+                 , error_string="Invalid input. Input cannot be empty!"
+                 , valid=lambda val: val != ""):
     while True:
-        try:
-            string_input = input(prompt)
-            string_input = float(string_input)      # If the input can be converted to a float, it's a number
-            print(error_string)       # If the input can't be converted to a float, it is a string and
-            continue                                 # the code will throw an valueError exception
-        except ValueError:
-            return string_input                      # ,so it should return the input value
+        string_input = input(prompt)
+        if valid(string_input):
+            return string_input
+        else:
+            print(error_string)
+            print()
+            continue
+
+
+# A descriptive_prompt function that suggests string what they should enter
+def add_descriptive_prompt(suggested_input_list):
+    # A prompt text that is more descriptive
+    descriptive_prompt = "Please select one the following items only: "
+    descriptive_prompt += suggested_input_list[0]  # Modify prompt text if a list of items is provided
+    for i in range(len(suggested_input_list) - 1):
+        descriptive_prompt += ", " + suggested_input_list[i + 1]
+    return descriptive_prompt
 
 
 # A y_or_n function that asks the user to answer a year or no question and returns True if they type yes(or some
 # variant) and False if they type no (or some variant)
-def y_or_n(prompt="Please enter \"y\" or \"n\": ", error_string="Invalid input. Enter \"y\" or \"n\" only!"):
+def y_or_n(prompt="Please enter \"y\" or \"n\": ", error_string="Invalid input!"):
+    y_n_dict = {"y": True
+                , "yes": True
+                , "true": True
+                , "n": False
+                , "no": False
+                , "false": False}
+
     while True:
         response = input(prompt)
-        if response.lower() != "y" and response.lower() != "n" \
-                and response.lower() != "yes" and response.lower() != "no":
-            print(error_string)
-            continue
+        if response.lower() in tuple(y_n_dict.keys()):
+            return y_n_dict[response.lower()]
         else:
-            if response.lower() != "y" or response.lower() != "yes":
-                return True
-            else:
-                return False
+            print(error_string)
+            print(add_descriptive_prompt(tuple(y_n_dict.keys())))
+            print()
+
 
 # A select_item function that takes a list of choices, prompts the user to select a choice, and returns the choice that
 # the user selected (e.g., the user should be able to select a type of food from a list of food)
+def select_item(prompt=None
+                , error_string="Invalid input."
+                , items=("Α", "α", "Β", "β", "Γ", "γ", "Δ", "δ", "Ε", "ε"
+            , "Ζ", "ζ", "Η", "η", "Θ", "θ", "Ι", "ι", "Κ", "κ", "Λ", "λ", "Μ", "μ", "Ν", "ν", "Ξ", "ξ", "Ο", "ο", "Π"
+            , "π", "Ρ", "ρ", "Σ", "ς", "Τ", "τ", "Υ", "υ", "Φ", "φ", "Χ", "χ", "Ψ", "ψ", "Ω", "ω"), maps=None):
 
+    # Modify the item dictionary
+    mod_maps = {}
+    if maps is not None:
+        for key in maps.keys():
+            mod_maps[str(key).lower()] = maps[key]
+    else:
+        for item in items:
+            mod_maps[str(item).lower()] = item
 
-def select_item(*item, prompt="Enter a number to select the item: ", error_string="Invalid input. Enter a number "
-                                                                                  "from the menu to select an item!"):
+    if prompt is None:
+        prompt = add_descriptive_prompt(tuple(mod_maps.keys())) + "\nEnter a value: "
+
+    # Prompt user for input and validate it
     while True:
-        count = 0
-        print("Menu")
-        try:
-            for i in item:                                      # Print the menu
-                count += 1
-                print(count, ". ", i)
-
-            number_selected = int(input(prompt))     # Prompt user to enter a number to select the item
-            # print("Items selected: ", item[number_selected - 1])
-            return item[number_selected - 1]
-        except ValueError or IndexError:
+        user_input = input(prompt)
+        if user_input.lower() in mod_maps.keys():
+            return mod_maps[user_input.lower()]
+        else:
             print(error_string)
+            print(add_descriptive_prompt(tuple(mod_maps.keys())))
             print()
 
 
 # An interface called input_value that takes a type keyword argument, and executes one of the above functions depending
 # on the type (type="int", type = "float", type = "string", type = "y_or_n" , type = "item_selected")
-def input_value(type_selected, *args, **kwargs):
+def input_value(type_selected, **kwargs):
     if type_selected == "int":
-        input_int(**kwargs)
+        return input_int(**kwargs)
     elif type_selected == "float":
-        input_float()
+        return input_float(**kwargs)
     elif type_selected == "string":
-        input_string()
+        return input_string(**kwargs)
     elif type_selected == "y_or_n":
-        y_or_n()
-    elif type_selected == "item_selected":
-        select_item(*args)
+        return y_or_n(**kwargs)
+    elif type_selected == "item":
+        return select_item(**kwargs)
     else:
         print("Unspecified input type. Integer input test is selected!")
-        input_int(**kwargs)
-"""
-if __name__ == "__main__":
-    input_value("int", gt=5, le=15)     # Integer input test
-    #input_int()
-    #input_value("float")                # Float input test
-    #nput_float()
-    #input_value("string")               # String input test
-    #input_string(prompt="Enter a text:")
-    #input_value("y_or_n")               # y or n input test
-    #y_or_n()
-    #input_value("item_selected", "Milk", "Coffee", "Cheese")         # Select an item test
-    #select_item("Honey", "Bok choy", "Ramen", "Cassava root", "Flour", prompt="Choose an item: ")
-    #input_value("asfdsd")               # Unspecified input type test
-"""
-
-
+        return input_int(**kwargs)
 
