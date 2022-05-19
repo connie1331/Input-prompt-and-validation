@@ -9,6 +9,7 @@ Sources:          Lab 1 specifications
                   https://stackoverflow.com/questions/3886402/how-to-get-numbers-after-decimal-point
                   Week 3 Lecture
 """
+from datetime import datetime
 
 
 # A num_in_range_validation function that returns True if the number is in a specifies range.
@@ -69,12 +70,26 @@ def input_string(prompt="Please enter a piece of text: "
                  , valid=lambda val: val != ""):
     while True:
         string_input = input(prompt)
+        print()
         if valid(string_input):
             return string_input
         else:
             print(error_string)
             print()
             continue
+
+
+# An input_date_string_format function that asks the user to type date in required format
+def input_date_string_format(prompt = "Please enter date: ", error_string="Invalid date format. Try again!"
+                             , date_format="%Y-%m-%d"):
+    while True:
+        try:
+            date_input = input(prompt)
+            datetime.strptime(date_input, date_format)
+            return date_input
+        except ValueError:
+            print(error_string)
+            print()
 
 
 # A descriptive_prompt function that suggests string what they should enter
@@ -107,22 +122,34 @@ def y_or_n(prompt="Please enter \"y\" or \"n\": ", error_string="Invalid input!"
             print()
 
 
-# A select_item function that takes a list of choices, prompts the user to select a choice, and returns the choice that
-# the user selected (e.g., the user should be able to select a type of food from a list of food)
+# A select_item function () that takes a list of choices, prompts the user to select a choice,
+# and returns the choice that the user selected (e.g., the user should be able to select a type of food
+# from a list of food)
 def select_item(prompt=None
                 , error_string="Invalid input."
                 , items=("Α", "α", "Β", "β", "Γ", "γ", "Δ", "δ", "Ε", "ε"
-            , "Ζ", "ζ", "Η", "η", "Θ", "θ", "Ι", "ι", "Κ", "κ", "Λ", "λ", "Μ", "μ", "Ν", "ν", "Ξ", "ξ", "Ο", "ο", "Π"
-            , "π", "Ρ", "ρ", "Σ", "ς", "Τ", "τ", "Υ", "υ", "Φ", "φ", "Χ", "χ", "Ψ", "ψ", "Ω", "ω"), maps=None):
+                , "Ζ", "ζ", "Η", "η", "Θ", "θ", "Ι", "ι", "Κ", "κ", "Λ", "λ", "Μ", "μ", "Ν", "ν", "Ξ", "ξ", "Ο", "ο"
+                , "Π", "π", "Ρ", "ρ", "Σ", "ς", "Τ", "τ", "Υ", "υ", "Φ", "φ", "Χ", "χ", "Ψ", "ψ", "Ω", "ω"), maps=None
+                , case_sensitive=True):
+    mod_items = []
+
+    if not case_sensitive:  # if user input is not case-sensitive required, adjust items all to lower case
+        for item in items:
+            if item == str:
+                mod_items.append(item.lower())
+            else:
+                mod_items.append(item)
+    else:
+        mod_items = items
 
     # Modify the item dictionary
     mod_maps = {}
     if maps is not None:
         for key in maps.keys():
-            mod_maps[str(key).lower()] = maps[key]
+            mod_maps[str(key)] = maps[key]
     else:
-        for item in items:
-            mod_maps[str(item).lower()] = item
+        for item in mod_items:
+            mod_maps[str(item)] = item
 
     if prompt is None:
         prompt = add_descriptive_prompt(tuple(mod_maps.keys())) + "\nEnter a value: "
@@ -130,8 +157,8 @@ def select_item(prompt=None
     # Prompt user for input and validate it
     while True:
         user_input = input(prompt)
-        if user_input.lower() in mod_maps.keys():
-            return mod_maps[user_input.lower()]
+        if user_input in mod_maps.keys():
+            return mod_maps[user_input]
         else:
             print(error_string)
             print(add_descriptive_prompt(tuple(mod_maps.keys())))
@@ -153,5 +180,11 @@ def input_value(type_selected, **kwargs):
         return select_item(**kwargs)
     else:
         print("Unspecified input type. Integer input test is selected!")
+        print()
         return input_int(**kwargs)
 
+
+if __name__ == "__main__":
+    menu_selection = select_item(prompt="Please select the item from the list: "
+                                 , items=(1, 2, 3, 4, 5, 6, 7, 8, 9)
+                                 , case_sensitive=True)
